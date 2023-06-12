@@ -127,7 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Schatzsuche.c" />
+    <ClCompile Include="Listenverwaltung.c" />
+    <ClCompile Include="mathe.c" />
+    <ClCompile Include="main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Listenverwaltung.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="mathe.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
