@@ -24,7 +24,7 @@ Ziel: Programm erzeugt random Zahl die der Benutzer anschließend erraten muss, d
 
 
 //Strukturierter Datentyp
-typedef struct {
+typedef struct wegPunkt{
 
 	double x_koordinate;
 	double y_koordinate;
@@ -38,6 +38,8 @@ double getDouble(char text[]);
 wegPunkt* appendElement(wegPunkt* pH, wegPunkt* pE);
 int anzWegPunkte(wegPunkt* pH);
 double randome();
+double gesamtDistance(wegPunkt* pHead);
+double initalDistance(double x, double y);
 
 //void showList(wegPunkt* pH);
 //void showElem(wegPunkt* pE);
@@ -45,34 +47,51 @@ double randome();
 int main() {
 	wegPunkt* pStart = NULL;
 	wegPunkt* pElemn;
-
-
+	double totalDist = 0, targetX=0, targetY=0, initalDist=0;
+	int anz = 0, score=0;
 	srand(time(NULL));
 	//1. Punkt in Liste auf Ursprung setzen
 	pStart = (wegPunkt*)malloc(sizeof(wegPunkt));
 
-	if (ON_OFF == 0) {
+	
 		pStart->x_koordinate = 0;
 		pStart->y_koordinate = 0;
 		pStart->pNext;
-	}
+	
+		//Bestimmen ob Target konstant oder zufällig sein soll
+		if (ON_OFF == 1) {
+			targetX = 3;
+			targetY = 2;
+			initalDist = initalDistance(targetX, targetY);
+		}
+		else {
+			targetX = randome();
+			targetY = randome();
+			initalDist = initalDistance(targetX, targetY);
+		}
 
-	else {
-		pStart->x_koordinate = randome();
-		pStart->y_koordinate = randome();
-		pStart->pNext;
-
-	}
+	
 
 
 
 	double test = getDouble("zw. 1-10");
 	printf("%lf", test);
-
+	totalDist = gesamtDistance(pStart);
+	anz = anzWegPunkte(pStart);
+	score = scoring(totalDist, initalDist, anz);
+	printf("Zurückgelegte Gesamtstrecke: %lf", totalDist);
+	printf("Dein Punktestand betraget: %d", score);
 	return;
 }
 
+double initalDistance(double x, double y) {
 
+	double dist;
+
+	dist = sqrt((x * x) + (y * y));
+
+	return dist;
+}
 
 
 
@@ -139,6 +158,32 @@ int anzWegPunkte(wegPunkt* pH) {
 }
 
 
+/*
+gessamtDistance: berechnet die absolut zurück gelegte Strecke bis das Ziel gefunden wurde
+input: wegPunkt pHead (Head pointer von Liste)
+return: double totalDistance (gesamte Distanz)
+*/
+double gesamtDistance(wegPunkt* pHead) {
+	double totalDistance = 0;
+	double dx = 0, dy = 0;
+	wegPunkt* current = pHead;
+	while (current->pNext != NULL) {
+		dx = current->pNext->x_koordinate;
+		dy = current->pNext->y_koordinate;
+		totalDistance += sqrt((dx * dx) + (dy * dy)); //aufsummierung sämtlicher zurückgelegter Teilwege
+		current = current->pNext;
+	}
+	return totalDistance;
+}
+
+int scoring(double distance, double initalDistance, int anzWegPunkte) {
+
+	int score = 0;
+
+	score = 100 * (initalDistance / (distance * sqrt(anzWegPunkte)));
+
+	return score;
+}
 
 
 /*
