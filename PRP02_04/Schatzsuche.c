@@ -88,9 +88,10 @@ int main() {
 		wegPunkt* pSearch;
 		while(pSearch->pNext!=NULL) //nach letztem neueintrag in liste suchen, so vewerwendet man listen normalerweise
 		*/
-		traveldDist = Distance((lastElem->x_koordinate-pElemn->x_koordinate), (lastElem->y_koordinate-pElemn->y_koordinate)); //Bestimmung 
-		dist2target = sqrt(pow(targetX - pElemn->x_koordinate, 2) + pow(targetY - pElemn->y_koordinate, 2));
-		appendElement(pHead, pElemn);
+		traveldDist = Distance((lastElem->x_koordinate-pElemn->x_koordinate), (lastElem->y_koordinate-pElemn->y_koordinate)); //Bestimmung aktueller Position
+		dist2target = sqrt(pow(targetX - pElemn->x_koordinate, 2) + pow(targetY - pElemn->y_koordinate, 2)); //distanz zum Ziel bestimmen
+		
+		appendElement(pHead, pElemn); //eingegebenes Element an Liste anhängen
 		printf("\n");
 		
 		
@@ -101,6 +102,7 @@ int main() {
 		printf("\n\n");
 
 	}
+	//letzen 10% werden automatisch zurückgelegt, letze Distanz wird berechnet
 	if ((dist2target <= (initalDist * 0.1)) && (dist2target!=0)) {
 		printf("Schatz in Sichtweite, du mobilisierst deine letzten Kraefte und setzt zum Sprint an.\n");
 		lastDist = initalDist - traveldDist;
@@ -109,9 +111,8 @@ int main() {
 	}
 
 
-
+	//Ausgabe gesamt Strecke und Punktestand
 	totalDist = gesamtDistance(pHead) + lastDist;
-	
 	anz = anzWegPunkte(pHead)-1;
 	score = scoring(totalDist, initalDist, anz);
 	printf("Zurueckgelegte Gesamtstrecke: %.2lf, in %d Zuegen.\n", totalDist, anz);
