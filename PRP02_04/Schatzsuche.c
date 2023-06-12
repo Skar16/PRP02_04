@@ -19,12 +19,12 @@ Ziel: Programm erzeugt random Zahl die der Benutzer anschließend erraten muss, d
 #define Y 3.5
 #define MAXX 5
 #define MAXY 5
-#define RANDMAX 10
+#define RANDMAX 5
 #define ON_OFF 1
 
 
 //Strukturierter Datentyp
-typedef struct wegPunkt{
+typedef struct wegPunkt {
 
 	double x_koordinate;
 	double y_koordinate;
@@ -40,64 +40,75 @@ int anzWegPunkte(wegPunkt* pH);
 double randome();
 double gesamtDistance(wegPunkt* pHead);
 double Distance(double x, double y);
-
-//void showList(wegPunkt* pH);
-//void showElem(wegPunkt* pE);
+int scoring(double distance, double initalDistance, int anzWegPunkte);
 
 int main() {
-	//Pointer für Liste
-	wegPunkt* pStart = NULL;
-	wegPunkt* pElemn;
+	//Pointer fuer Liste
+	wegPunkt* pHead = NULL; //startpunkt der Liste
+	wegPunkt* pElemn; //pointer fuer neues Element
+
 	//restliche Variablen
 	double targetX = 0, targetY = 0, dX = 0, dY = 0;
-	double totalDist = 0, traveldDist=0, initalDist = 0, dist2target = 0;
-	int anz = 0, score=0;
+	double totalDist = 0, traveldDist = 0, initalDist = 0, dist2target = 0, lastDist=0;
+	int anz = 0, score = 0;
 	srand(time(NULL));
+	
+	
+	
 	//1. Punkt in Liste allokieren
-	pStart = (wegPunkt*)malloc(sizeof(wegPunkt));
-
-	
-		pStart->x_koordinate = 0;
-		pStart->y_koordinate = 0;
-		pStart->pNext;
-	
-		//Bestimmen ob Target konstant oder zufällig sein soll
-		if (ON_OFF == 1) {
-			targetX = 3;
-			targetY = 2;
-			initalDist = Distance(targetX, targetY);
-		}
-		else {
-			targetX = randome();
-			targetY = randome();
-			initalDist = Distance(targetX, targetY);
-		}
-		printf("Zielkoordinaten: x:%.2lf \t y:%.2lf.\n", targetX, targetY);
-		printf("Anfangsentfernung:%.2lf\n", initalDist);
-		dist2target = initalDist;
-
-		while (dist2target >= (initalDist * 0.1)) { //schleife solange nicht näher als 10% von inital Distanz
-			printf("Bitte eine Strecke eingeben.\n");
-			pElemn=newElement();
-			appendElement(pStart, pElemn);
-			 
-			traveldDist = Distance(pElemn->x_koordinate, pElemn->y_koordinate);
-			dist2target = sqrt(pow(targetX - pElemn->x_koordinate, 2) + pow(targetY - pElemn->y_koordinate, 2));
-			
-			
-			//Ausgabe des Neuen Standortes
-			printf("Neue Position: (x:%.2lf, y:%.2lf)\n", pElemn->x_koordinate, pElemn->y_koordinate);
-			printf("Zurückgelegte Teilstrecke: %.2lf\n", traveldDist);
-			printf("Neue Entfernung zum Ziel: %.2lf\n", dist2target);
+	pHead = (wegPunkt*)malloc(sizeof(wegPunkt));
+	pHead->x_koordinate = 0;
+	pHead->y_koordinate = 0;
+	pHead->pNext=NULL;
 
 
-			pStart->pNext; //hier vllt fehler?
-		}
+	//Bestimmen ob Target konstant oder zufaellig sein soll
+	if (ON_OFF == 1) {
+		targetX = 3;
+		targetY = 2;
+		initalDist = Distance(targetX, targetY);
+	}
+	else {
+		targetX = randome();
+		targetY = randome();
+		initalDist = Distance(targetX, targetY);
+	}
+	printf("Zielkoordinaten: x:%.2lf \t y:%.2lf.\n", targetX, targetY);
+	printf("Anfangsentfernung:%.2lfkm\n", initalDist);
+	dist2target = initalDist;
 
-	totalDist = gesamtDistance(pStart);
-	anz = anzWegPunkte(pStart);
+	while (dist2target >= (initalDist * 0.1)) { //schleife solange nicht naeher als 10% von inital Distanz
+		printf("Bitte eine Strecke eingeben.\n");
+		pElemn = newElement();
+		appendElement(pHead, pElemn);
+
+		/*
+		wegPunkt* pSearch;
+		while(pSearch->pNext!=NULL) //nach letztem neueintrag in liste suchen, so vewerwendet man listen normalerweise
+		*/
+		traveldDist = Distance(pElemn->x_koordinate, pElemn->y_koordinate);
+		dist2target = sqrt(pow(targetX - pElemn->x_koordinate, 2) + pow(targetY - pElemn->y_koordinate, 2));
+
+
+		//Ausgabe des Neuen Standortes
+		printf("Neue Position: (x:%.2lf, y:%.2lf)\n", pElemn->x_koordinate, pElemn->y_koordinate);
+		printf("Zurueckgelegte Teilstrecke: %.2lf\n", traveldDist);
+		printf("Neue Entfernung zum Ziel: %.2lf\n", dist2target);
+		printf("\n\n");
+
+	}
+	if (dist2target == (initalDist * 0.1)) {
+		printf("Schatz in Sichtweite, du mobilisierst deine letzten Kraefte und setzt zum Sprint an.\n");
+		lastDist = initalDist - dist2target;
+		anz = 1;
+	}
+
+
+
+	totalDist = gesamtDistance(pHead)+lastDist;
+	anz += anzWegPunkte(pHead);
 	score = scoring(totalDist, initalDist, anz);
-	printf("Zurückgelegte Gesamtstrecke: %.2lf, in %d Zügen", totalDist, anz);
+	printf("Zurueckgelegte Gesamtstrecke: %.2lf, in %d Zuegen", totalDist, anz);
 	printf("Dein Punktestand betraget: %d", score);
 	return;
 }
@@ -125,8 +136,8 @@ return: double value
 double randome() {
 	double val;
 
-	val = (((double)rand() / (double)RANDMAX)*6-5); //generiert randome zahl zwischen +5 und -5
-	
+	val = (((double)rand() / (double)RANDMAX) * 6 - 5); //generiert randome zahl zwischen +5 und -5
+
 	return val;
 }
 
@@ -134,13 +145,13 @@ double randome() {
 /*
 newElement: legt neues Element in der Liste an
 input: none
-return: struct values + pointer aufs nächste Elemnt pNext
+return: struct values + pointer aufs naechste Elemnt pNext
 */
 wegPunkt* newElement() {
 	//Speicherallokierung
 	wegPunkt* pE = (wegPunkt*)malloc(sizeof(wegPunkt));
 
-	//einlesen der Werte und neue Verknüpfung auf pNext
+	//einlesen der Werte und neue Verknuepfung auf pNext
 	pE->x_koordinate = getDouble("delta-x:");
 	pE->y_koordinate = getDouble("delta-y:");
 	pE->pNext = NULL;
@@ -148,28 +159,28 @@ wegPunkt* newElement() {
 }
 
 /*
-appendElement: hängt neuerzeugtes Element an bestehende Liste
+appendElement: haengt neuerzeugtes Element an bestehende Liste
 input: pStart, pElement
-return: pElement(angehängt), pStart(Listenkopf) -- Typ: struct(wegPunkt)
+return: pElement(angehaengt), pStart(Listenkopf) -- Typ: struct(wegPunkt)
 */
-wegPunkt * appendElement(wegPunkt* pH, wegPunkt* pE) {
+wegPunkt* appendElement(wegPunkt* pH, wegPunkt* pE) {
 
 
-	wegPunkt * pSearch = pH; //Suchpointer
+	wegPunkt* pSearch = pH; //Suchpointer
 	if (pH == NULL) { //Falls liste leer, erstes Element= listenkopf
 		return pE;
 	}
 	else {
-		while (pSearch->pNext != NULL) { //Ansonsten suchen bis NULL Pointer (End of list) gefunden
+		while (pSearch->pNext != NULL)  //Ansonsten suchen bis NULL Pointer (End of list) gefunden
 			pSearch = pSearch->pNext; //suchpointer umlegen
-			pSearch->pNext = pE;	  //suchpointer auf Listenelement verknüpfen
-			return pH; //Listenkopf beibehalten
-		}
+		pSearch->pNext = pE;	  //suchpointer auf Listenelement verknuepfen
+		return pH; //Listenkopf beibehalten
+
 	}
 }
 
 /*
-anzWegPunkte: gibt die Anzahl an Datenblock einträgen in der Liste wieder
+anzWegPunkte: gibt die Anzahl an Datenblock eintraegen in der Liste wieder
 input: pH(pStart), listenkopf
 return: int anz
 */
@@ -186,7 +197,7 @@ int anzWegPunkte(wegPunkt* pH) {
 
 
 /*
-gessamtDistance: berechnet die absolut zurück gelegte Strecke bis das Ziel gefunden wurde
+gessamtDistance: berechnet die absolut zurueck gelegte Strecke bis das Ziel gefunden wurde
 input: wegPunkt pHead (Head pointer von Liste)
 return: double totalDistance (gesamte Distanz)
 */
@@ -197,7 +208,7 @@ double gesamtDistance(wegPunkt* pHead) {
 	while (current->pNext != NULL) {
 		dx = current->pNext->x_koordinate;
 		dy = current->pNext->y_koordinate;
-		totalDistance += sqrt((dx * dx) + (dy * dy)); //aufsummierung sämtlicher zurückgelegter Teilwege
+		totalDistance += Distance(dx, dy); //aufsummierung saemtlicher zurueckgelegter Teilwege
 		current = current->pNext;
 	}
 	return totalDistance;
@@ -219,22 +230,22 @@ int scoring(double distance, double initalDistance, int anzWegPunkte) {
 
 
 /*
-Einlesenfkt für double Werte.
+Einlesenfkt fuer double Werte.
 input: Ausgabe was eingegben werden soll
 return: double value
 */
 double getDouble(char text[]) {
 
-	
+
 	double val = 0;
 	int test = 0;
 	do {
 		printf("%s", text);
-		test = scanf_s("%.2lf", &val);
-		if ((test != 1) || (val > MAXX)) {
+		test = scanf_s("%lf", &val);
+		if (test != 1) { // ||((val > MAXX)||(val>MAXY)))
 			while (getchar() != '\n');
 			printf("Maximal erlaubte eingabe x:+-%d und y:+-%d eingeben\n", MAXX, MAXY);
-			
+
 		}
 	} while (test != 1);
 
