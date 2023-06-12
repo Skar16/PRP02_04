@@ -69,9 +69,8 @@ int main() {
 			targetY = randome();
 			initalDist = initalDistance(targetX, targetY);
 		}
-
-	
-
+		printf("Zielkoordinaten: x-%lf y-%lf", targetX, targetY);
+		printf("Anfangsentfernung:%lf", initalDist);
 
 
 	double test = getDouble("zw. 1-10");
