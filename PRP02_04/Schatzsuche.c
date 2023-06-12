@@ -20,7 +20,7 @@ Ziel: Programm erzeugt random Zahl die der Benutzer anschließend erraten muss, d
 #define MAXX 5
 #define MAXY 5
 #define RANDMAX 5
-#define ON_OFF 1
+#define ON_OFF 0
 
 
 //Strukturierter Datentyp
@@ -33,7 +33,7 @@ typedef struct wegPunkt {
 
 
 //Fkt. Prototypen
-wegPunkt* newElement();
+wegPunkt* newElement(wegPunkt* pH);
 double getDouble(char text[]);
 wegPunkt* appendElement(wegPunkt* pH, wegPunkt* pE);
 int anzWegPunkte(wegPunkt* pH);
@@ -41,6 +41,8 @@ double randome();
 double gesamtDistance(wegPunkt* pHead);
 double Distance(double x, double y);
 int scoring(double distance, double initalDistance, int anzWegPunkte);
+wegPunkt* lastElement(wegPunkt* pH);
+
 
 int main() {
 	//Pointer fuer Liste
@@ -49,17 +51,17 @@ int main() {
 
 	//restliche Variablen
 	double targetX = 0, targetY = 0, dX = 0, dY = 0;
-	double totalDist = 0, traveldDist = 0, initalDist = 0, dist2target = 0, lastDist=0;
+	double totalDist = 0, traveldDist = 0, initalDist = 0, dist2target = 0, lastDist = 0;
 	int anz = 0, score = 0;
 	srand(time(NULL));
-	
-	
-	
+
+
+
 	//1. Punkt in Liste allokieren
 	pHead = (wegPunkt*)malloc(sizeof(wegPunkt));
 	pHead->x_koordinate = 0;
 	pHead->y_koordinate = 0;
-	pHead->pNext=NULL;
+	pHead->pNext = NULL;
 
 
 	//Bestimmen ob Target konstant oder zufaellig sein soll
@@ -79,17 +81,19 @@ int main() {
 
 	while (dist2target >= (initalDist * 0.1)) { //schleife solange nicht naeher als 10% von inital Distanz
 		printf("Bitte eine Strecke eingeben.\n");
-		pElemn = newElement();
-		appendElement(pHead, pElemn);
-
+		pElemn = newElement(pHead);
+		
+		wegPunkt* lastElem=lastElement(pHead); //suche nach letzem Koordinaten Punkt
 		/*
 		wegPunkt* pSearch;
 		while(pSearch->pNext!=NULL) //nach letztem neueintrag in liste suchen, so vewerwendet man listen normalerweise
 		*/
-		traveldDist = Distance(pElemn->x_koordinate, pElemn->y_koordinate);
+		traveldDist = Distance((lastElem->x_koordinate-pElemn->x_koordinate), (lastElem->y_koordinate-pElemn->y_koordinate)); //Bestimmung 
 		dist2target = sqrt(pow(targetX - pElemn->x_koordinate, 2) + pow(targetY - pElemn->y_koordinate, 2));
-
-
+		appendElement(pHead, pElemn);
+		printf("\n");
+		
+		
 		//Ausgabe des Neuen Standortes
 		printf("Neue Position: (x:%.2lf, y:%.2lf)\n", pElemn->x_koordinate, pElemn->y_koordinate);
 		printf("Zurueckgelegte Teilstrecke: %.2lf\n", traveldDist);
@@ -97,19 +101,21 @@ int main() {
 		printf("\n\n");
 
 	}
-	if (dist2target == (initalDist * 0.1)) {
+	if ((dist2target <= (initalDist * 0.1)) && (dist2target!=0)) {
 		printf("Schatz in Sichtweite, du mobilisierst deine letzten Kraefte und setzt zum Sprint an.\n");
-		lastDist = initalDist - dist2target;
+		lastDist = initalDist - traveldDist;
+		printf("Letze Teilstrecke: %.2lf\n", lastDist);
 		anz = 1;
 	}
 
 
 
-	totalDist = gesamtDistance(pHead)+lastDist;
-	anz += anzWegPunkte(pHead);
+	totalDist = gesamtDistance(pHead) + lastDist;
+	
+	anz = anzWegPunkte(pHead)-1;
 	score = scoring(totalDist, initalDist, anz);
-	printf("Zurueckgelegte Gesamtstrecke: %.2lf, in %d Zuegen", totalDist, anz);
-	printf("Dein Punktestand betraget: %d", score);
+	printf("Zurueckgelegte Gesamtstrecke: %.2lf, in %d Zuegen.\n", totalDist, anz);
+	printf("Dein Punktestand betraget: %d\n\n", score);
 	return;
 }
 
@@ -136,7 +142,7 @@ return: double value
 double randome() {
 	double val;
 
-	val = (((double)rand() / (double)RANDMAX) * 6 - 5); //generiert randome zahl zwischen +5 und -5
+	val = (((double)(rand() % (RANDMAX * 200)) / 100) - RANDMAX); //generiert randome zahl zwischen +5 und -5
 
 	return val;
 }
@@ -147,16 +153,32 @@ newElement: legt neues Element in der Liste an
 input: none
 return: struct values + pointer aufs naechste Elemnt pNext
 */
-wegPunkt* newElement() {
+wegPunkt* newElement(wegPunkt* pH) {
 	//Speicherallokierung
 	wegPunkt* pE = (wegPunkt*)malloc(sizeof(wegPunkt));
+	wegPunkt* pLast = lastElement(pH);//suche letztes Element zur Differenzbestimmung der Distanz zum neuen Punkt
 
 	//einlesen der Werte und neue Verknuepfung auf pNext
-	pE->x_koordinate = getDouble("delta-x:");
-	pE->y_koordinate = getDouble("delta-y:");
+	pE->x_koordinate = getDouble("delta-x:") + pLast->x_koordinate;
+	pE->y_koordinate = getDouble("delta-y:") + pLast->y_koordinate;
 	pE->pNext = NULL;
 	return pE;
 }
+
+/*
+lastElement: sucht letzes Element in Liste
+input: pH(Startpunkt der Liste)
+return: wegPunkt* pH (gebunden auf letztes Listen Element)
+*/
+wegPunkt* lastElement(wegPunkt* pH) {
+
+	while (pH->pNext != NULL) { //Suche letzes Listelement
+		pH = pH->pNext;
+	}
+
+	return pH;
+}
+
 
 /*
 appendElement: haengt neuerzeugtes Element an bestehende Liste
