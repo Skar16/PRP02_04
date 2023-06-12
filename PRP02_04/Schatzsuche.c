@@ -39,18 +39,21 @@ wegPunkt* appendElement(wegPunkt* pH, wegPunkt* pE);
 int anzWegPunkte(wegPunkt* pH);
 double randome();
 double gesamtDistance(wegPunkt* pHead);
-double initalDistance(double x, double y);
+double Distance(double x, double y);
 
 //void showList(wegPunkt* pH);
 //void showElem(wegPunkt* pE);
 
 int main() {
+	//Pointer für Liste
 	wegPunkt* pStart = NULL;
 	wegPunkt* pElemn;
-	double totalDist = 0, targetX=0, targetY=0, initalDist=0;
+	//restliche Variablen
+	double targetX = 0, targetY = 0, dX = 0, dY = 0;
+	double totalDist = 0, traveldDist=0, initalDist = 0, dist2target = 0;
 	int anz = 0, score=0;
 	srand(time(NULL));
-	//1. Punkt in Liste auf Ursprung setzen
+	//1. Punkt in Liste allokieren
 	pStart = (wegPunkt*)malloc(sizeof(wegPunkt));
 
 	
@@ -62,28 +65,49 @@ int main() {
 		if (ON_OFF == 1) {
 			targetX = 3;
 			targetY = 2;
-			initalDist = initalDistance(targetX, targetY);
+			initalDist = Distance(targetX, targetY);
 		}
 		else {
 			targetX = randome();
 			targetY = randome();
-			initalDist = initalDistance(targetX, targetY);
+			initalDist = Distance(targetX, targetY);
 		}
-		printf("Zielkoordinaten: x-%lf y-%lf", targetX, targetY);
-		printf("Anfangsentfernung:%lf", initalDist);
+		printf("Zielkoordinaten: x:%.2lf \t y:%.2lf.\n", targetX, targetY);
+		printf("Anfangsentfernung:%.2lf\n", initalDist);
+		dist2target = initalDist;
+
+		while (dist2target >= (initalDist * 0.1)) { //schleife solange nicht näher als 10% von inital Distanz
+			printf("Bitte eine Strecke eingeben.\n");
+			pElemn=newElement();
+			appendElement(pStart, pElemn);
+			 
+			traveldDist = Distance(pElemn->x_koordinate, pElemn->y_koordinate);
+			dist2target = sqrt(pow(targetX - pElemn->x_koordinate, 2) + pow(targetY - pElemn->y_koordinate, 2));
+			
+			
+			//Ausgabe des Neuen Standortes
+			printf("Neue Position: (x:%.2lf, y:%.2lf)\n", pElemn->x_koordinate, pElemn->y_koordinate);
+			printf("Zurückgelegte Teilstrecke: %.2lf\n", traveldDist);
+			printf("Neue Entfernung zum Ziel: %.2lf\n", dist2target);
 
 
-	double test = getDouble("zw. 1-10");
-	printf("%lf", test);
+			pStart->pNext; //hier vllt fehler?
+		}
+
 	totalDist = gesamtDistance(pStart);
 	anz = anzWegPunkte(pStart);
 	score = scoring(totalDist, initalDist, anz);
-	printf("Zurückgelegte Gesamtstrecke: %lf", totalDist);
+	printf("Zurückgelegte Gesamtstrecke: %.2lf, in %d Zügen", totalDist, anz);
 	printf("Dein Punktestand betraget: %d", score);
 	return;
 }
 
-double initalDistance(double x, double y) {
+/*
+initalDistance: bestimmt Distanz vom Anfang bis zum Schatz
+input: "Schatz" koordinaten
+return: double distanz
+*/
+double Distance(double x, double y) {
 
 	double dist;
 
@@ -93,12 +117,16 @@ double initalDistance(double x, double y) {
 }
 
 
-
+/*
+randome: generiert eine random zahl die mit dem Makro RANDMAX begrenz wird
+input: none (makro, RANDMAX->Invervall)
+return: double value
+*/
 double randome() {
 	double val;
 
-	val = ((double)rand() / (double)RANDMAX);
-
+	val = (((double)rand() / (double)RANDMAX)*6-5); //generiert randome zahl zwischen +5 und -5
+	
 	return val;
 }
 
@@ -175,6 +203,11 @@ double gesamtDistance(wegPunkt* pHead) {
 	return totalDistance;
 }
 
+/*
+scoring: rechnet anhand gegebener Formel die Punktzahl des Users aus
+input: initaldistance, traveldDistance, anzMovment,
+return: int score
+*/
 int scoring(double distance, double initalDistance, int anzWegPunkte) {
 
 	int score = 0;
@@ -192,15 +225,16 @@ return: double value
 */
 double getDouble(char text[]) {
 
-
+	
 	double val = 0;
 	int test = 0;
 	do {
-		test = scanf_s("%lf", &val);
+		printf("%s", text);
+		test = scanf_s("%.2lf", &val);
 		if ((test != 1) || (val > MAXX)) {
 			while (getchar() != '\n');
-			printf("Bitte maximal x-%d und y-%d eingeben\n", MAXX, MAXY);
-			printf("%s", text);
+			printf("Maximal erlaubte eingabe x:+-%d und y:+-%d eingeben\n", MAXX, MAXY);
+			
 		}
 	} while (test != 1);
 
@@ -208,20 +242,3 @@ double getDouble(char text[]) {
 	return val;
 }
 
-
-
-/*
-void showList(wegPunkt* pH) {
-	wegPunkt* pE;
-	unsigned int i;
-	for (i = 0, pE = pH; i < getCount(pH); i++) {
-		printf("%2d", i + 1);
-		showElem(pE);
-		pE = pE->pNext;
-	}
-}
-
-void showElem(wegPunkt* pE) {
-	printf("%lf  %lf", pE->pNext, pE->y_koordinate);
-}
-*/
