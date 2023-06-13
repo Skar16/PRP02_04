@@ -15,6 +15,8 @@ Ziel: Programm erzeugt random Zahl die der Benutzer anschließend erraten muss, d
 #include "mathe.h"
 #include"Listenverwaltung.h"
 
+
+
 int main() {
 	//Pointer fuer Liste
 	wegPunkt* pHead = NULL; //startpunkt der Liste
@@ -76,9 +78,10 @@ int main() {
 	//letzen 10% werden automatisch zurückgelegt, letze Distanz wird berechnet
 	if ((dist2target <= (initalDist * 0.1)) && (dist2target!=0)) {
 		printf("Schatz in Sichtweite, du mobilisierst deine letzten Kraefte und setzt zum Sprint an.\n");
-		lastDist = initalDist - traveldDist;
+		pElemn=lastElementDistance(pHead, targetX, targetY);
+		appendElement(pHead, pElemn);
+		lastDist = dist2target;
 		printf("Letze Teilstrecke: %.2lf\n", lastDist);
-		anz = 1;
 	}
 
 
@@ -90,6 +93,8 @@ int main() {
 	printf("Dein Punktestand betraget: %d\n\n", score);
 	return;
 }
+
+
 
 
 

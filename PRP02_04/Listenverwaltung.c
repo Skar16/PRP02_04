@@ -61,7 +61,7 @@ input: pH(pStart), listenkopf
 return: int anz
 */
 int anzWegPunkte(wegPunkt* pH) {
-	int anz = 1;
+	int anz = 0;
 	if (pH == NULL) //Liste leer
 		return 0;
 	while (pH->pNext != NULL) {
@@ -87,4 +87,16 @@ double gesamtDistance(wegPunkt* pHead) {
 		current = current->pNext;
 	}
 	return totalDistance;
+}
+
+wegPunkt* lastElementDistance(wegPunkt* pH, double targetX, double targetY) {
+	//Speicherallokierung
+	wegPunkt* pE = (wegPunkt*)malloc(sizeof(wegPunkt));
+	wegPunkt* pLast = lastElement(pH);//suche letztes Element zur Differenzbestimmung der Distanz zum neuen Punkt
+
+	//einlesen der Werte und neue Verknuepfung auf pNext
+	pE->x_koordinate = targetX - pLast->x_koordinate;
+	pE->y_koordinate = targetY - pLast->y_koordinate;
+	pE->pNext = NULL;
+	return pE;
 }
